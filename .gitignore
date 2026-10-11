@@ -1,0 +1,26 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables & API Keys (بسیار مهم)
+.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & VectorDB Storage
+*.log
+data/chroma/
+data/qdrant/
