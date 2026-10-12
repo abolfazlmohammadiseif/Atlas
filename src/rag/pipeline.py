@@ -66,7 +66,8 @@ class RAGPipeline:
 
         if not context.strip():
             logger.warning("No relevant context found for the query.")
-            return "I'm sorry, but I couldn't find any relevant information in the documents to answer your question."
+            return "I'm sorry, but I couldn't find any relevant information \
+                 in the documents to answer your question."
 
         # 3. Generate answer
         answer = self.generator.generate_answer(query=question, context=context)
