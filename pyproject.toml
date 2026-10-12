@@ -3,6 +3,7 @@ name = "autonomous-research-agent"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "chromadb>=1.5.9",
     "openai>=3.29.0",
     "pydantic>=2.14.0",
     "pydantic-settings>=2.15.0",
@@ -13,6 +14,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "ruff>=0.17.0",
 ]
 [build-system]
@@ -40,3 +43,14 @@ ignore = []
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --cov=src --cov-report=term-missing"
+
+
+
