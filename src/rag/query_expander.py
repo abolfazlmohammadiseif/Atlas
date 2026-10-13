@@ -37,8 +37,10 @@ class QueryExpander:
         system_prompt = (
             "You are an AI assistant specialized in information retrieval.\n"
             f"Your task is to generate {num_queries} alternative versions of the user's query.\n"
-            "Each version must capture different synonyms, phrasing, or technical aspects of the same intent.\n"
-            "Provide the generated queries separated strictly by newlines, with no bullet points or numbering."
+            "Each version must capture different synonyms, phrasing, or technical aspects "
+            "of the same intent.\n"
+            "Provide the generated queries separated strictly by newlines, "
+            "with no bullet points or numbering."
         )
 
         try:
@@ -53,7 +55,6 @@ class QueryExpander:
             content = response.choices[0].message.content or ""
             generated_queries = [line.strip() for line in content.split("\n") if line.strip()]
 
-            # Ensure original query is included and duplicates are removed while preserving order
             all_queries = [query] + [q for q in generated_queries if q != query]
             logger.info("Expanded query into %d variations.", len(all_queries))
             return all_queries

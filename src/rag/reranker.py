@@ -3,25 +3,51 @@ Reranker module for RAG pipeline using Cross-Encoders.
 Re-scores retrieved context chunks to ensure top relevance before passing to the LLM.
 """
 
-from typing import Any
-
-from sentence_transformers import CrossEncoder
+from typing import Any, Protocol
 
 from src.utils.logger import logger
+
+
+class CrossEncoderProtocol(Protocol):
+    """Protocol defining expected CrossEncoder interface."""
+
+    def predict(self, sentences: list[list[str]]) -> list[float]:
+        """Predicts relevance scores for pairs of (query, doc)."""
+        ...
 
 
 class DocumentReranker:
     """Reranks retrieved document chunks using a Cross-Encoder model."""
 
-    def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2") -> None:
-        """Initializes the reranker with a CrossEncoder model.
+    def __init__(
+        self,
+        model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        model_instance: Any = None,
+    ) -> None:
+        """Initializes the reranker with a CrossEncoder model or injected mock instance.
 
         Args:
             model_name: HuggingFace model identifier for CrossEncoder.
+            model_instance: Optional explicit CrossEncoder instance for testing.
         """
         self.model_name = model_name
-        self.model = CrossEncoder(self.model_name)
+        self._model = model_instance
         logger.info("DocumentReranker initialized with model: '%s'", self.model_name)
+
+    @property
+    def model(self) -> Any:
+        """Lazy loading of the CrossEncoder model."""
+        if self._model is None:
+            try:
+                from sentence_transformers import CrossEncoder
+
+                self._model = CrossEncoder(self.model_name)
+            except ImportError as e:
+                logger.error("sentence_transformers or transformers library is missing.")
+                raise RuntimeError(
+                    "CrossEncoder requirements missing. Install transformers and sentence-transformers."
+                ) from e
+        return self._model
 
     def rerank(
         self, query: str, chunks: list[dict[str, Any]], top_k: int = 3
@@ -39,13 +65,9 @@ class DocumentReranker:
         if not chunks or not query.strip():
             return chunks[:top_k]
 
-        # Construct (query, document_text) pairs for CrossEncoder evaluation
         pairs = [[query, chunk.get("text", "")] for chunk in chunks]
-
-        # Predict relevance scores (higher means more relevant)
         scores = self.model.predict(pairs)
 
-        # Attach score to each chunk dictionary and sort
         scored_chunks = []
         for score, chunk in zip(scores, chunks, strict=False):
             chunk_copy = dict(chunk)
